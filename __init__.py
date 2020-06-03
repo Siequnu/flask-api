@@ -8,3 +8,6 @@ from app.api import routes, schemas
 
 api.add_resource(routes.LibraryListApi, '/api/v1/library')
 api.add_resource(routes.LibraryUploadApi, '/api/v1/library/<int:id>')
+
+api.add_resource(routes.ConsultationListApi, '/api/v1/consultation/list')
+api.add_resource(routes.ConsultationApi, '/api/v1/consultation/', '/api/v1/consultation/<int:id>')

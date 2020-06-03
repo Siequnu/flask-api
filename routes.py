@@ -5,7 +5,9 @@ from flask_restful import Resource, reqparse
 from app import db
 import app.models
 from app.models import LibraryUpload, ApiKey
-from app.api.schemas import LibraryUploadSchema
+from app.consultations.models import Consultation
+from app.api.schemas import LibraryUploadSchema, ConsultationSchema
+
 from app.api import bp, models
 from app.api.forms import ApiCreationForm
 
@@ -50,6 +52,74 @@ def delete_api_key(id):
 # API routes
 library_uploads_schema = LibraryUploadSchema (many = True)
 library_upload_schema = LibraryUploadSchema ()
+
+consultations_schema = ConsultationSchema (many = True)
+consultation_schema = ConsultationSchema ()
+
+class ConsultationListApi (Resource):
+	def get(self):
+		if models.validate_api_key (request.headers.get('key')):
+			consultations = consultations_schema.dump(Consultation.query.all())
+			return consultations, 200
+		else: return {}, 401
+		
+
+class ConsultationApi (Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('date', type = str, location = 'json')
+		self.reqparse.add_argument('start_time', type = str, location = 'json')
+		self.reqparse.add_argument('end_time', type = str, location = 'json')
+		self.reqparse.add_argument('teacher_id', type = str, location = 'json')
+		self.reqparse.add_argument('student_id', type = str, location = 'json')
+		super(ConsultationApi, self).__init__()
+		
+	def get(self, id):
+		args = self.reqparse.parse_args()
+		if models.validate_api_key (request.headers.get('key')):
+			consultation = consultation_schema.dump(Consultation.query.get(id))
+			return consultation, 200
+		else: return {}, 401
+	
+	def post(self):
+		args = self.reqparse.parse_args()
+		if models.validate_api_key (request.headers.get('key')):
+			consultation = Consultation()
+			consultation.date = args['date']
+			consultation.start_time = args['start_time']
+			consultation.end_time = args['end_time']
+			consultation.teacher_id = args['teacher_id']
+			consultation.student_id = args['student_id']
+			
+			db.session.add(consultation)
+			db.session.flush()
+			
+			consultation_id = consultation.id
+			
+			db.session.commit()
+			result = consultation_schema.dump(consultation)
+			
+			return result, 200
+		else: return {}, 401
+	
+	def put(self, id):
+		args = self.reqparse.parse_args()
+		if models.validate_api_key (request.headers.get('key')):
+			consultation = Consultation.query.filter_by(id=id).first()
+			if not consultation:
+				return {'message': 'Consultation does not exist'}, 400
+			consultation.date = args['date']
+			consultation.start_time = args['start_time']
+			consultation.end_time = args['end_time']
+			consultation.teacher_id = args['teacher_id']
+			consultation.student_id = args['student_id']
+			
+			db.session.commit()
+			result = consultation_schema.dump(consultation)
+			
+			return result, 200
+		else: return {}, 401
+
 class LibraryListApi (Resource):
 	def get(self):
 		if models.validate_api_key (request.headers.get('key')):
