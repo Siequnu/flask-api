@@ -4,11 +4,12 @@ from flask_restful import Resource, reqparse
 
 from app import db
 import app.models
-from app.models import LibraryUpload, ApiKey
+from app.models import LibraryUpload
 from app.consultations.models import Consultation
 from app.api.schemas import LibraryUploadSchema, ConsultationSchema
 
 from app.api import bp, models
+from app.api.models import ApiKey
 from app.api.forms import ApiCreationForm
 
 import json, secrets
