@@ -5,8 +5,8 @@ from flask_restful import Resource, reqparse
 from app import db
 import app.models
 from app.models import LibraryUpload
-from app.consultations.models import Consultation
-from app.api.schemas import LibraryUploadSchema, ConsultationSchema
+from app.consultations.models import Consultation, ConsultationSchedulingOption
+from app.api.schemas import LibraryUploadSchema, ConsultationSchema, ConsultationSchedulingSchema
 
 from app.api import bp, models
 from app.api.models import ApiKey
@@ -56,6 +56,7 @@ library_upload_schema = LibraryUploadSchema ()
 
 consultations_schema = ConsultationSchema (many = True)
 consultation_schema = ConsultationSchema ()
+consultation_scheduling_schema = ConsultationSchedulingSchema ()
 
 class ConsultationListApi (Resource):
 	def get(self):
@@ -93,11 +94,9 @@ class ConsultationApi (Resource):
 			consultation.student_id = args['student_id']
 			
 			db.session.add(consultation)
-			db.session.flush()
-			
-			consultation_id = consultation.id
-			
+			db.session.flush()	
 			db.session.commit()
+
 			result = consultation_schema.dump(consultation)
 			
 			return result, 200
@@ -120,6 +119,43 @@ class ConsultationApi (Resource):
 			
 			return result, 200
 		else: return {}, 401
+
+class ConsultationSchedulingApi (Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('consultation_id', type = str, location = 'json')
+		self.reqparse.add_argument('date', type = str, location = 'json')
+		self.reqparse.add_argument('start_time', type = str, location = 'json')
+		self.reqparse.add_argument('end_time', type = str, location = 'json')
+		super(ConsultationSchedulingApi, self).__init__()
+		
+	def get(self, id):
+		args = self.reqparse.parse_args()
+		if models.validate_api_key (request.headers.get('key')):
+			consultation_schedule = consultation_scheduling_schema.dump(ConsultationSchedulingOption.query.get(id))
+			return consultation_schedule, 200
+		else: return {}, 401
+	
+	def post(self):
+		args = self.reqparse.parse_args()
+		if models.validate_api_key (request.headers.get('key')):
+			if Consultation.query.get(args['consultation_id']) is None:
+				return {'error': 'Could not locate the consultation you requested.'}, 401
+			consultation_schedule = ConsultationSchedulingOption()
+			consultation_schedule.consultation_id = args['consultation_id']
+			consultation_schedule.date = args['date']
+			consultation_schedule.start_time = args['start_time']
+			consultation_schedule.end_time = args['end_time']
+			
+			db.session.add(consultation_schedule)
+			db.session.flush()
+			db.session.commit()
+
+			result = consultation_scheduling_schema.dump(consultation_schedule)
+			
+			return result, 200
+		else: return {}, 401
+
 
 class LibraryListApi (Resource):
 	def get(self):

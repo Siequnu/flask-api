@@ -10,3 +10,7 @@ class LibraryUploadSchema (ma.SQLAlchemySchema):
 class ConsultationSchema (ma.SQLAlchemySchema):
 	class Meta:
 		fields = ('id', 'date', 'start_time', 'end_time', 'teacher_id', 'student_id')
+
+class ConsultationSchedulingSchema (ma.SQLAlchemySchema):
+	class Meta:
+		fields = ('id', 'consultation_id', 'date', 'start_time', 'end_time')
