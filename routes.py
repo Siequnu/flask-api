@@ -6,7 +6,9 @@ from app import db
 import app.models
 from app.models import LibraryUpload
 from app.consultations.models import Consultation, ConsultationSchedulingOption
-from app.api.schemas import LibraryUploadSchema, ConsultationSchema, ConsultationSchedulingSchema
+from app.checklists.models import Checklist, ChecklistItem
+import app.checklists.models
+from app.api.schemas import LibraryUploadSchema, ConsultationSchema, ConsultationSchedulingSchema, ChecklistSchema, ChecklistItemSchema
 
 from app.api import bp, models
 from app.api.models import ApiKey
@@ -63,6 +65,48 @@ library_upload_schema = LibraryUploadSchema()
 consultations_schema = ConsultationSchema(many=True)
 consultation_schema = ConsultationSchema()
 consultation_scheduling_schema = ConsultationSchedulingSchema()
+
+checklist_schema = ChecklistSchema ()
+checklist_item_schema = ChecklistItemSchema ()
+
+class ChecklistApi (Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		super(ChecklistApi, self).__init__()
+
+	def get(self, id):
+		args = self.reqparse.parse_args()
+		if models.validate_api_key(request.headers.get('key')):
+			checklist = Checklist.query.get(id)
+			if not checklist:
+				return {'message': 'Checklist does not exist'}, 400
+			checklist_dict = checklist.__dict__
+			checklist_dict['completed_percentage'] = checklist.get_completed_progress_percentage ()
+			checklist = checklist_schema.dump(checklist_dict)
+			return checklist, 200
+		else:
+			return {}, 401
+
+
+class ChecklistItemsApi (Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('completed', type=bool, location='json')
+		super(ChecklistItemsApi, self).__init__()
+
+	def put(self, id):
+		args = self.reqparse.parse_args()
+		if models.validate_api_key(request.headers.get('key')):
+			checklist_item = ChecklistItem.query.filter_by(id=id).first()
+			if not checklist_item:
+				return {'message': 'Checklist item does not exist'}, 400
+			checklist_item.completed = args['completed']
+			db.session.commit()
+			result = checklist_item_schema.dump(checklist_item)
+
+			return result, 200
+		else:
+			return {}, 401
 
 
 class ConsultationListApi (Resource):

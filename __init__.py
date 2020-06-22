@@ -12,3 +12,6 @@ api.add_resource(routes.LibraryUploadApi, '/api/v1/library/<int:id>')
 api.add_resource(routes.ConsultationListApi, '/api/v1/consultation/list')
 api.add_resource(routes.ConsultationApi, '/api/v1/consultation/', '/api/v1/consultation/<int:id>')
 api.add_resource(routes.ConsultationSchedulingApi, '/api/v1/consultation/schedule')
+
+api.add_resource(routes.ChecklistApi, '/api/v1/checklist/<int:id>')
+api.add_resource(routes.ChecklistItemsApi, '/api/v1/checklist/item/<int:id>')

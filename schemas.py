@@ -14,3 +14,12 @@ class ConsultationSchema (ma.SQLAlchemySchema):
 class ConsultationSchedulingSchema (ma.SQLAlchemySchema):
 	class Meta:
 		fields = ('id', 'consultation_id', 'date', 'start_time', 'end_time')
+
+class ChecklistSchema (ma.SQLAlchemySchema):
+	class Meta:
+		fields = ('id', 'title', 'description', 'user_id', 'completed_percentage')
+
+class ChecklistItemSchema (ma.SQLAlchemySchema):
+	class Meta:
+		fields = ('id', 'title', 'description', 'completed', 'user_id')
+
