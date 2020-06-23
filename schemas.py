@@ -17,7 +17,7 @@ class ConsultationSchedulingSchema (ma.SQLAlchemySchema):
 
 class ChecklistSchema (ma.SQLAlchemySchema):
 	class Meta:
-		fields = ('id', 'title', 'description', 'user_id', 'completed_percentage')
+		fields = ('id', 'title', 'description', 'user_id', 'completed_percentage', 'items_remaining')
 
 class ChecklistItemSchema (ma.SQLAlchemySchema):
 	class Meta:

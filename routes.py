@@ -82,6 +82,7 @@ class ChecklistApi (Resource):
 				return {'message': 'Checklist does not exist'}, 400
 			checklist_dict = checklist.__dict__
 			checklist_dict['completed_percentage'] = checklist.get_completed_progress_percentage ()
+			checklist_dict['items_remaining'] = checklist.get_remaining_items_count ()
 			checklist = checklist_schema.dump(checklist_dict)
 			return checklist, 200
 		else:
