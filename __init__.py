@@ -14,4 +14,5 @@ api.add_resource(routes.ConsultationApi, '/api/v1/consultation/', '/api/v1/consu
 api.add_resource(routes.ConsultationSchedulingApi, '/api/v1/consultation/schedule')
 
 api.add_resource(routes.ChecklistApi, '/api/v1/checklist/<int:id>')
+api.add_resource(routes.ChecklistColourApi, '/api/v1/checklist/colour/<int:id>')
 api.add_resource(routes.ChecklistItemsApi, '/api/v1/checklist/item/<int:id>')

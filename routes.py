@@ -58,7 +58,7 @@ def delete_api_key(id):
 	abort(403)
 
 
-# API routes
+# API schemas
 library_uploads_schema = LibraryUploadSchema(many=True)
 library_upload_schema = LibraryUploadSchema()
 
@@ -105,6 +105,33 @@ class ChecklistItemsApi (Resource):
 			db.session.commit()
 			result = checklist_item_schema.dump(checklist_item)
 
+			return result, 200
+		else:
+			return {}, 401
+
+class ChecklistColourApi (Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('hue', type=int, location='json')
+		self.reqparse.add_argument('saturation', type=int, location='json')
+		self.reqparse.add_argument('lightness', type=int, location='json')
+		super(ChecklistColourApi, self).__init__()
+
+	def put(self, id):
+		args = self.reqparse.parse_args()
+		if models.validate_api_key(request.headers.get('key')):
+			checklist = Checklist.query.get(id)
+			if not checklist:
+				return {'message': 'Checklist does not exist'}, 400
+			
+			hue = args['hue']
+			saturation = args['saturation']
+			lightness = args['lightness']
+			
+			checklist.set_hsl (hue, saturation, lightness)
+			db.session.commit()
+			
+			result = checklist_schema.dump(checklist)
 			return result, 200
 		else:
 			return {}, 401
