@@ -7,8 +7,9 @@ import app.models
 from app.models import LibraryUpload
 from app.consultations.models import Consultation, ConsultationSchedulingOption
 from app.checklists.models import Checklist, ChecklistItem
+from app.goals.models import StudentGoalTemplate
 import app.checklists.models
-from app.api.schemas import LibraryUploadSchema, ConsultationSchema, ConsultationSchedulingSchema, ChecklistSchema, ChecklistItemSchema
+from app.api.schemas import LibraryUploadSchema, ConsultationSchema, ConsultationSchedulingSchema, ChecklistSchema, ChecklistItemSchema, StudentGoalTemplateSchema
 
 from app.api import bp, models
 from app.api.models import ApiKey
@@ -19,8 +20,6 @@ import secrets
 from datetime import datetime
 
 # API management GUI Routes
-
-
 @bp.route("/api/manage")
 @login_required
 def manage_api_keys():
@@ -28,7 +27,6 @@ def manage_api_keys():
 		api_keys = ApiKey.query.all()
 		return render_template('api/manage_api_keys.html', api_keys=api_keys)
 	abort(403)
-
 
 @bp.route("/api/create", methods=['GET', 'POST'])
 @login_required
@@ -44,7 +42,6 @@ def create_api_key():
 			return redirect(url_for('api.manage_api_keys'))
 		return render_template('api/create_api_key.html', form=form)
 	abort(403)
-
 
 @bp.route("/api/delete/<int:id>")
 @login_required
@@ -68,6 +65,33 @@ consultation_scheduling_schema = ConsultationSchedulingSchema()
 
 checklist_schema = ChecklistSchema ()
 checklist_item_schema = ChecklistItemSchema ()
+
+student_goal_template_schema = StudentGoalTemplateSchema ()
+
+class StudentGoalTemplateApi (Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('title', type=str, location='json')
+		self.reqparse.add_argument('template_data', type=str, location='json')
+		super(StudentGoalTemplateApi, self).__init__()
+
+	def post(self):
+		args = self.reqparse.parse_args()
+		if models.validate_api_key(request.headers.get('key')):
+			student_goal_template = StudentGoalTemplate()
+			student_goal_template.title = args['title']
+			student_goal_template.template_data = args['template_data']
+
+			db.session.add(student_goal_template)
+			db.session.flush()
+			db.session.commit()
+
+			result = student_goal_template_schema.dump(student_goal_template)
+
+			return result, 200
+		else:
+			return {}, 401
+
 
 class ChecklistApi (Resource):
 	def __init__(self):

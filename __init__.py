@@ -16,3 +16,5 @@ api.add_resource(routes.ConsultationSchedulingApi, '/api/v1/consultation/schedul
 api.add_resource(routes.ChecklistApi, '/api/v1/checklist/<int:id>')
 api.add_resource(routes.ChecklistColourApi, '/api/v1/checklist/colour/<int:id>')
 api.add_resource(routes.ChecklistItemsApi, '/api/v1/checklist/item/<int:id>')
+
+api.add_resource(routes.StudentGoalTemplateApi, '/api/v1/goals/template')
