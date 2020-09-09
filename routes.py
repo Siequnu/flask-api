@@ -55,6 +55,26 @@ def delete_api_key(id):
 	abort(403)
 
 
+# Simple API routes
+# Return total library downloads
+@bp.route("/api/library/stats")
+@login_required
+def get_library_stats():
+	if app.models.is_admin(current_user.username):
+		return {'download_count': app.files.models.get_total_library_downloads_count ()}
+	abort(403)
+
+# Return logged in users
+@bp.route("/api/users/stats")
+@login_required
+def get_user_stats():
+	if app.models.is_admin(current_user.username):
+		return {
+			'active_users': app.user.models.get_active_user_count(),
+			'user_count': app.user.models.get_total_user_count()
+		}
+	abort(403)
+
 # API schemas
 library_uploads_schema = LibraryUploadSchema(many=True)
 library_upload_schema = LibraryUploadSchema()
