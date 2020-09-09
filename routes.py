@@ -75,6 +75,14 @@ def get_user_stats():
 		}
 	abort(403)
 
+# Return file stats
+@bp.route("/api/files/stats")
+@login_required
+def get_file_stats():
+	if app.models.is_admin(current_user.username):
+		return {'total_uploads': app.files.models.get_all_uploads_count()}
+	abort(403)
+
 # API schemas
 library_uploads_schema = LibraryUploadSchema(many=True)
 library_upload_schema = LibraryUploadSchema()
