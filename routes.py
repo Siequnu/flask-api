@@ -1,4 +1,4 @@
-from flask import Flask, request, abort, flash, current_app, session, Response, render_template, url_for, redirect
+from flask import Flask, request, abort, flash, current_app, session, Response, render_template, url_for, redirect, jsonify
 from flask_login import login_required, current_user
 from flask_restful import Resource, reqparse
 
@@ -60,7 +60,7 @@ def delete_api_key(id):
 @login_required
 def get_library_stats():
 	if app.models.is_admin(current_user.username):
-		return {'download_count': app.files.models.get_total_library_downloads_count ()}
+		return jsonify({'download_count': app.files.models.get_total_library_downloads_count ()})
 	abort(403)
 
 # Return logged in users
@@ -68,10 +68,10 @@ def get_library_stats():
 @login_required
 def get_user_stats():
 	if app.models.is_admin(current_user.username):
-		return {
+		return jsonify({
 			'active_users': app.user.models.get_active_user_count(),
 			'user_count': app.user.models.get_total_user_count()
-		}
+		})
 	abort(403)
 
 # Return file stats
@@ -79,7 +79,7 @@ def get_user_stats():
 @login_required
 def get_file_stats():
 	if app.models.is_admin(current_user.username):
-		return {'total_uploads': app.files.models.get_all_uploads_count()}
+		return jsonify({'total_uploads': app.files.models.get_all_uploads_count()})
 	abort(403)
 
 # Return random student from a class
@@ -90,7 +90,7 @@ def generate_random_student(turma_id):
 		class_enrollments = Enrollment.query.filter_by (turma_id = turma_id).all()
 		if len(class_enrollments) < 1: return False
 		student = User.query.get(random.choice (class_enrollments).user_id)
-		return {'random_student': student.username}
+		return jsonify({'random_student': student.username})
 	abort(403)
 
 # API schemas
