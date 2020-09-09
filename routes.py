@@ -4,7 +4,7 @@ from flask_restful import Resource, reqparse
 
 from app import db
 import app.models
-from app.models import LibraryUpload
+from app.models import LibraryUpload, Enrollment, User
 from app.consultations.models import Consultation, ConsultationSchedulingOption
 from app.checklists.models import Checklist, ChecklistItem
 from app.goals.models import StudentGoalTemplate
@@ -15,8 +15,7 @@ from app.api import bp, models
 from app.api.models import ApiKey
 from app.api.forms import ApiCreationForm
 
-import json
-import secrets
+import json, secrets, random
 from datetime import datetime
 
 # API management GUI Routes
@@ -81,6 +80,17 @@ def get_user_stats():
 def get_file_stats():
 	if app.models.is_admin(current_user.username):
 		return {'total_uploads': app.files.models.get_all_uploads_count()}
+	abort(403)
+
+# Return random student from a class
+@bp.route("/api/users/random/<int:turma_id>")
+@login_required
+def generate_random_student(turma_id):
+	if app.models.is_admin(current_user.username):
+		class_enrollments = Enrollment.query.filter_by (turma_id = turma_id).all()
+		if len(class_enrollments) < 1: return False
+		student = User.query.get(random.choice (class_enrollments).user_id)
+		return {'random_student': student.username}
 	abort(403)
 
 # API schemas
