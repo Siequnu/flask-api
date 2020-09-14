@@ -93,6 +93,32 @@ def generate_random_student(turma_id):
 		return jsonify({'random_student': student.username})
 	abort(403)
 
+# Parse a Zoom URL code
+# Returns False if parsing fails
+@bp.route("/api/classes/parse/", methods = ['POST'])
+@login_required
+def parse_zoom_invitation ():
+	if app.models.is_admin (current_user.username):
+		# Extract lesson data from pasted Zoom message		
+		try:
+			split = request.json['zoomInvitation'].split('Meeting ID: ')
+			split = split[1].split ('\n')
+			meeting_details = split[0].split(' Passcode: ')
+			meeting_id = meeting_details[0]
+			meeting_passcode = meeting_details[1]
+
+			meeting_url = request.json['zoomInvitation'].split('Join Zoom Meeting ')
+			meeting_url = meeting_url[1].split('  Meeting ID:')
+			meeting_url = meeting_url[0]
+
+			return jsonify ({
+				'meeting_url': meeting_url,
+				'meeting_id': meeting_id,
+				'meeting_passcode': meeting_passcode
+			})
+		except:
+			return jsonify ({'error': 'Could not process the data.'})
+	abort (403)
 # API schemas
 library_uploads_schema = LibraryUploadSchema(many=True)
 library_upload_schema = LibraryUploadSchema()
