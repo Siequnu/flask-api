@@ -99,16 +99,15 @@ def generate_random_student(turma_id):
 @login_required
 def parse_zoom_invitation ():
 	if app.models.is_admin (current_user.username):
-		# Extract lesson data from pasted Zoom message		
 		try:
+			# Extract lesson data from pasted Zoom message	
 			split = request.json['zoomInvitation'].split('Meeting ID: ')
-			split = split[1].split ('\n')
-			meeting_details = split[0].split(' Passcode: ')
+			meeting_details = split[1].split('\nPasscode: ')
 			meeting_id = meeting_details[0]
 			meeting_passcode = meeting_details[1]
 
-			meeting_url = request.json['zoomInvitation'].split('Join Zoom Meeting ')
-			meeting_url = meeting_url[1].split('  Meeting ID:')
+			meeting_url = request.json['zoomInvitation'].split('Join Zoom Meeting\n')
+			meeting_url = meeting_url[1].split('\n\nMeeting ID:')
 			meeting_url = meeting_url[0]
 
 			return jsonify ({
