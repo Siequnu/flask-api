@@ -1,15 +1,24 @@
  {% extends "header.html" %} {% from 'bootstrap/form.html' import render_form %} {% block app_content %}
+
+<!-- Alternative Bootstrap theme -->
+<link rel="stylesheet" href="/static/bootstrap/mdb.lite.min.css" type="text/css">
+<script src="/static/bootstrap/mdb.min.js"></script>
+
+<div class="container">
+    <br><a href="{{url_for('api.manage_api_keys')}}"> <button class="btn btn-primary"><i class="fa fa-chevron-left"></i> Back</button></a>
+</div> 
 <div class="container">
     <br>
-    <div class="card bg-light mb-3" style="max-width: 40rem;">
+    <div class="card" style="max-width: 40rem;">
         <div class="card-body">
 
             <h1>Register new API key</h1>
             <br>
-            <br><a href="{{url_for('api.manage_api_keys')}}" <button class="btn btn-primary"><i class="fa fa-chevron-left"></i> Back</button></a>
+            <p>A random API key will automatically be generated on each page refresh. Alternatively, you can choose your own key.</p>
+            
             <form method="post">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                {{ render_form(form) }}
+                {{ render_form(form, button_style='success') }}
               </form>
         </div>
     </div>
