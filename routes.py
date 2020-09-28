@@ -22,7 +22,7 @@ from datetime import datetime
 @bp.route("/api/manage")
 @login_required
 def manage_api_keys():
-	if app.models.is_admin(current_user.username):
+	if current_user.is_superintendant:
 		api_keys = ApiKey.query.all()
 		return render_template('api/manage_api_keys.html', api_keys=api_keys)
 	abort(403)
@@ -30,7 +30,7 @@ def manage_api_keys():
 @bp.route("/api/create", methods=['GET', 'POST'])
 @login_required
 def create_api_key():
-	if app.models.is_admin(current_user.username):
+	if current_user.is_superintendant:
 		key = secrets.token_urlsafe(40)
 		form = ApiCreationForm(key=key)
 		if form.validate_on_submit():
@@ -45,7 +45,7 @@ def create_api_key():
 @bp.route("/api/delete/<int:id>")
 @login_required
 def delete_api_key(id):
-	if app.models.is_admin(current_user.username):
+	if current_user.is_superintendant:
 		if app.api.models.delete_api_key(id):
 			flash('API key successfully created', 'success')
 		else:
@@ -87,7 +87,12 @@ def get_file_stats():
 @login_required
 def generate_random_student(turma_id):
 	if app.models.is_admin(current_user.username):
+		# Check if current user manages this class
+		if app.classes.models.check_if_turma_id_belongs_to_a_teacher (turma_id, current_user.id) is False:
+			abort (403)
+		
 		class_enrollments = Enrollment.query.filter_by (turma_id = turma_id).all()
+
 		if len(class_enrollments) < 1: return False
 		student = User.query.get(random.choice (class_enrollments).user_id)
 		return jsonify({'random_student': student.username})
